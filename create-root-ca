@@ -84,8 +84,8 @@ openssl ca -gencrl -batch \
            -out crl/ca.crl
 
 # Create the chain bundle for intermediate ca to use
-cat ca/private/ca.key >> ca/chain.pem
-chmod 400 ca/chain.pem
+cat ca/ca.crt >> ca/chain.pem
+chmod 0400 ca/chain.pem
 
 # Replicate the existing binary directory
 for BIN in ${BINARIES}; do
