@@ -70,20 +70,20 @@ pushd ${HOME} > /dev/null
 template "${BIN_DIR}/templates/signing.tpl" "conf/ca.conf"
 
 # Create the signing CA key
-openssl genrsa -out ${HOME}/ca/private/ca.key -passout env:CA_PASS 2048
-chmod 0400 ${HOME}/ca/private/ca.key
+openssl genrsa -out ca/private/ca.key -passout env:CA_PASS 2048
+chmod 0400 ca/private/ca.key
 
 # Create the signing CA csr
 openssl req -new -batch \
-            -config ${HOME}/conf/ca.conf \
-            -key ${HOME}/ca/private/ca.key \
-            -out ${HOME}/ca/ca.csr \
+            -config conf/ca.conf \
+            -key ca/private/ca.key \
+            -out ca/ca.csr \
             -passin env:CA_PASS
 
 # Create the signing CA certificate
 pushd ${PARENT} > /dev/null
 openssl ca -batch -notext \
-           -config ${HOME}/conf/ca.conf \
+           -config conf/ca.conf \
            -in ${HOME}/ca/ca.csr \
            -out ${HOME}/ca/ca.crt \
            -days 3650 \
@@ -93,15 +93,14 @@ popd > /dev/null
 
 # Create the signing CRL
 openssl ca -gencrl -batch \
-           -config ${HOME}/conf/ca.conf \
-           -out ${HOME}/crl/ca.crl
+           -config conf/ca.conf \
+           -out crl/ca.crl
 
 # Create the chain bundle if this is a sub-CA
-cat ca/private/ca.key >> ca/chain.pem
 if [ -f "${PARENT}/ca/chain.pem" ]; then
     cat ${PARENT}/ca/chain.pem > ca/chain.pem
 fi
-chmod 400 ca/chain.pem
+cat ca/ca.crt >> ca/chain.pem
 
 for BIN in ${BINARIES}; do
     cp ${BIN_DIR}/${BIN} bin/
