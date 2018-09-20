@@ -98,4 +98,3 @@ popd > /dev/null
 echo
 echo "Root CA initialized."
 echo
-
