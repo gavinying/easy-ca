@@ -97,11 +97,10 @@ openssl ca -gencrl -batch \
            -out crl/ca.crl
 
 # Create the chain bundle if this is a sub-CA
-cat ca/private/ca.key >> ca/chain.pem
+cat ca/ca.crt > ca/chain.pem
 if [ -f "${PARENT}/ca/chain.pem" ]; then
-    cat ${PARENT}/ca/chain.pem > ca/chain.pem
+    cat ${PARENT}/ca/chain.pem >> ca/chain.pem
 fi
-cat ca/ca.crt >> ca/chain.pem
 chmod 0400 ca/chain.pem
 
 for BIN in ${BINARIES}; do
