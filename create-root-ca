@@ -1,6 +1,32 @@
 #!/bin/bash
+# Derek Moore <derek.moore@gmail.com>
 
-CA_DIR=generated/caysd-root-ca
+usage() {
+    echo "Usage: $0 -d CA_DIR"
+    echo "Initializes a new root CA in CA_DIR"
+    echo
+    echo "Options:"
+    echo "    -d CA_DIR  Target directory to be created and initializedz"
+    echo
+    exit 2
+}
+
+CA_DIR=
+
+while getopts d: FLAG; do
+    case $FLAG in
+        d) CA_DIR=${OPTARG} ;;
+        *) usage ;;
+    esac
+done
+
+if [ "${CA_DIR}" == "" ]; then
+    usage
+fi
+
+BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source ${BIN_DIR}/functions
+[[ -f "${BIN_DIR}/defaults.conf" ]] && source ${BIN_DIR}/defaults.conf
 
 HOME=$CA_DIR
 CA_NAME=$( basename "${HOME}" )
@@ -48,7 +74,7 @@ openssl ca -selfsign -batch -notext \
            -config conf/ca.conf \
            -in ca/ca.csr \
            -out ca/ca.crt \
-           -days 36500 \
+           -days 3652 \
            -extensions root_ca_ext \
            -passin env:CA_PASS
 
