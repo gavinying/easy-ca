@@ -1,32 +1,6 @@
 #!/bin/bash
-# Derek Moore <derek.moore@gmail.com>
 
-usage() {
-    echo "Usage: $0 -d CA_DIR"
-    echo "Initializes a new root CA in CA_DIR"
-    echo
-    echo "Options:"
-    echo "    -d CA_DIR  Target directory to be created and initialized"
-    echo
-    exit 2
-}
-
-CA_DIR=
-
-while getopts d: FLAG; do
-    case $FLAG in
-        d) CA_DIR=${OPTARG} ;;
-        *) usage ;;
-    esac
-done
-
-if [ "${CA_DIR}" == "" ]; then
-    usage
-fi
-
-BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source ${BIN_DIR}/functions
-[[ -f "${BIN_DIR}/defaults.conf" ]] && source ${BIN_DIR}/defaults.conf
+CA_DIR=generated/caysd-root-ca
 
 HOME=$CA_DIR
 CA_NAME=$( basename "${HOME}" )
@@ -74,7 +48,7 @@ openssl ca -selfsign -batch -notext \
            -config conf/ca.conf \
            -in ca/ca.csr \
            -out ca/ca.crt \
-           -days 3652 \
+           -days 36500 \
            -extensions root_ca_ext \
            -passin env:CA_PASS
 
@@ -82,6 +56,10 @@ openssl ca -selfsign -batch -notext \
 openssl ca -gencrl -batch \
            -config conf/ca.conf \
            -out crl/ca.crl
+
+# Create the chain bundle for intermediate ca to use
+cat ca/private/ca.key >> ca/chain.pem
+chmod 400 ca/chain.pem
 
 # Replicate the existing binary directory
 for BIN in ${BINARIES}; do
